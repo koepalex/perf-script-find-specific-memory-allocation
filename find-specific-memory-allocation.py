@@ -15,7 +15,7 @@ from Core import *
 
 ## >>>>>>>>>>>>>>>>>>>>>>>>>>>> CHANGE ME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ### Add here the address of memory pages, that are you looking for ...
-memory_pages_to_consider = { 0x78e8c18e7000 }
+memory_pages_to_consider = { 0x7d191cc00000, 0x7d193f400000, 0x7d1927800000, 0x7d2038a00000, 0x7d1939000000, 0x7d191a000000, 0x7d1934c00000 }
 ### or deactivate the filter by setting `memory_pages_to_consider` to **None**
 # memory_pages_to_consider = None
 ## <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -59,17 +59,20 @@ brk_stack = deque()
 def syscalls__sys_exit_mmap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
 	common_callchain, __syscall_nr, ret, perf_sample_dict):
-		
-		p = mmap_stack.pop()
 
-		if (memory_pages_to_consider is not None \
-	  		and (ret in memory_pages_to_consider)) \
-			or memory_pages_to_consider is None:
+		if len(mmap_stack) > 0:		
+			p = mmap_stack.pop()
 
-			print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
-			print(f"Parameters: addr={p.addr:x}, len={p.len}, prot={readable_mem_page_protection(p.prot)}, flags={readable_mem_page_flags(p.flags)}, fd={p.fd:x}, off={p.off:x}".format())
-			print(f"ret={ret:x}".format())
-			print_callchain(common_callchain)
+			if (memory_pages_to_consider is not None \
+				and (ret in memory_pages_to_consider)) \
+				or memory_pages_to_consider is None:
+
+				print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
+				print(f"Parameters: addr={p.addr:x}, len={p.len}, prot={readable_mem_page_protection(p.prot)}, flags={readable_mem_page_flags(p.flags)}, fd={p.fd:x}, off={p.off:x}".format())
+				print(f"ret={ret:x}".format())
+				print_callchain(common_callchain)
+		else:
+			print("Entered syscalls__sys_exit_mmap without syscalls__sys_enter_mmap first")
 
 def syscalls__sys_enter_mmap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
@@ -83,16 +86,19 @@ def syscalls__sys_exit_munmap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
 	common_callchain, __syscall_nr, ret, perf_sample_dict):
 		
-		p = munmap_stack.pop()
+		if len(munmap_stack) > 0:
+			p = munmap_stack.pop()
 
-		if (memory_pages_to_consider is not None \
-			and (p.addr in memory_pages_to_consider)) \
-			or memory_pages_to_consider is None:
+			if (memory_pages_to_consider is not None \
+				and (p.addr in memory_pages_to_consider)) \
+				or memory_pages_to_consider is None:
 
-			print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
-			print(f"Parameters: addr={p.addr:x}, len={p.len}\n".format())
-			print(f"ret={ret:x}".format())
-			print_callchain(common_callchain)
+				print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
+				print(f"Parameters: addr={p.addr:x}, len={p.len}\n".format())
+				print(f"ret={ret:x}".format())
+				print_callchain(common_callchain)
+		else:
+			print("Entered syscalls__sys_exit_munmap without syscalls__sys_enter_munmap first")
 
 def syscalls__sys_enter_munmap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
@@ -105,16 +111,19 @@ def syscalls__sys_exit_brk(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
 	common_callchain, __syscall_nr, ret, perf_sample_dict):
 
-		p = brk_stack.pop()
+		if len(brk_stack) > 0:
+			p = brk_stack.pop()
 
-		if (memory_pages_to_consider is not None \
-	  		and (p.addr in memory_pages_to_consider)) \
-			or memory_pages_to_consider is None:
+			if (memory_pages_to_consider is not None \
+				and (p.addr in memory_pages_to_consider)) \
+				or memory_pages_to_consider is None:
 
-			print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
-			print(f"Parameters: brk/addr={p.addr:x}\n".format())
-			print(f"ret={ret:x}".format())
-			print_callchain(common_callchain)
+				print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
+				print(f"Parameters: brk/addr={p.addr:x}\n".format())
+				print(f"ret={ret:x}".format())
+				print_callchain(common_callchain)
+		else:
+			print("Entered syscalls__sys_exit_brk without syscalls__sys_enter_brk first")
 
 def syscalls__sys_enter_brk(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
@@ -127,16 +136,19 @@ def syscalls__sys_exit_mremap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
 	common_callchain, __syscall_nr, ret, perf_sample_dict):
 
-		p = mremap_stack.pop()
+		if len(mremap_stack) > 0:
+			p = mremap_stack.pop()
 
-		if (memory_pages_to_consider is not None \
-	  		and (p.addr in memory_pages_to_consider or p.new_addr in memory_pages_to_consider)) \
-			or memory_pages_to_consider is None:
+			if (memory_pages_to_consider is not None \
+				and (p.addr in memory_pages_to_consider or p.new_addr in memory_pages_to_consider)) \
+				or memory_pages_to_consider is None:
 
-			print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
-			print(f"Parameters: addr={addr:x}, old_len={old_len}, new_len={new_len}, flags={readable_mem_page_flags(flags)}, new_addr={new_addr:x}\n".format())
-			print(f"ret={ret:x}".format())
-			print_callchain(common_callchain)
+				print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
+				print(f"Parameters: addr={addr:x}, old_len={old_len}, new_len={new_len}, flags={readable_mem_page_flags(flags)}, new_addr={new_addr:x}\n".format())
+				print(f"ret={ret:x}".format())
+				print_callchain(common_callchain)
+		else:
+			print("Entered syscalls__sys_exit_mremap without syscalls__sys_enter_mremap first")
 
 def syscalls__sys_enter_mremap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
