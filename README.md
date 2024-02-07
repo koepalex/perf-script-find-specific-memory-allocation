@@ -111,6 +111,16 @@ For dotnet 7.0 the generation of JIT-compiled mappings can be activated via:
 export DOTNET_PerfMapEnabled=1
 ```
 
+### Resolve dotnet methods
+
+If you are seeing `memfd: doublemapper (deleted)` instead of your dotnet method names, you need to disable the `WriteXorExecute` features (as described [collect a trace under microsoft learn](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/trace-perfcollect-lttng#collect-a-trace)):
+
+```zsh
+export DOTNET_EnableWriteXorExecute=0
+```
+
+This might be unnecessary in the future as perf the [dotnet/runtime #97765](https://github.com/dotnet/runtime/issues/97765#issuecomment-1927333703)
+
 ## 5. Additional Resources
 
 * [Brendan Gregg's Blog](https://brendangregg.com/perf.html)
