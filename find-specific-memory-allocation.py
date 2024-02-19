@@ -74,6 +74,12 @@ def syscalls__sys_exit_mmap(event_name, context, common_cpu,
 		else:
 			print(f"Entered syscalls__sys_exit_mmap without syscalls__sys_enter_mmap first, ret={ret:x}".format())
 
+			if (memory_pages_to_consider is not None \
+				and (ret in memory_pages_to_consider)) \
+				or memory_pages_to_consider is None:
+
+				print_callchain(common_callchain)
+
 def syscalls__sys_enter_mmap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
 	common_callchain, __syscall_nr, addr, len, prot, 
@@ -149,6 +155,12 @@ def syscalls__sys_exit_mremap(event_name, context, common_cpu,
 				print_callchain(common_callchain)
 		else:
 			print(f"Entered syscalls__sys_exit_mremap without syscalls__sys_enter_mremap first, ret={ret:x}".format())
+
+			if (memory_pages_to_consider is not None \
+				and (ret in memory_pages_to_consider)) \
+				or memory_pages_to_consider is None:
+
+				print_callchain(common_callchain)
 
 def syscalls__sys_enter_mremap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
