@@ -15,9 +15,9 @@ from Core import *
 
 ## >>>>>>>>>>>>>>>>>>>>>>>>>>>> CHANGE ME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ### Add here the address of memory pages, that are you looking for ...
-memory_pages_to_consider = { 0x7d191cc00000, 0x7d193f400000, 0x7d1927800000, 0x7d2038a00000, 0x7d1939000000, 0x7d191a000000, 0x7d1934c00000 }
+memory_pages_to_consider = { 0x7a77be800000, 0x7a7ea7330000, 0x7a778a000000, 0x7a778cc00000, 0x7a77a5400000, 0x7a77a2c00000 }
 ### or deactivate the filter by setting `memory_pages_to_consider` to **None**
-# memory_pages_to_consider = None
+#memory_pages_to_consider = None
 ## <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 ## Data Objects to store the context from syscalls__sys_enter_* calls to use it in the
@@ -72,7 +72,7 @@ def syscalls__sys_exit_mmap(event_name, context, common_cpu,
 				print(f"ret={ret:x}".format())
 				print_callchain(common_callchain)
 		else:
-			print("Entered syscalls__sys_exit_mmap without syscalls__sys_enter_mmap first")
+			print(f"Entered syscalls__sys_exit_mmap without syscalls__sys_enter_mmap first, ret={ret:x}".format())
 
 def syscalls__sys_enter_mmap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
@@ -98,7 +98,7 @@ def syscalls__sys_exit_munmap(event_name, context, common_cpu,
 				print(f"ret={ret:x}".format())
 				print_callchain(common_callchain)
 		else:
-			print("Entered syscalls__sys_exit_munmap without syscalls__sys_enter_munmap first")
+			print(f"Entered syscalls__sys_exit_munmap without syscalls__sys_enter_munmap first, ret={ret:x}".format())
 
 def syscalls__sys_enter_munmap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
@@ -123,7 +123,7 @@ def syscalls__sys_exit_brk(event_name, context, common_cpu,
 				print(f"ret={ret:x}".format())
 				print_callchain(common_callchain)
 		else:
-			print("Entered syscalls__sys_exit_brk without syscalls__sys_enter_brk first")
+			print(f"Entered syscalls__sys_exit_brk without syscalls__sys_enter_brk first, ret={ret:x}".format())
 
 def syscalls__sys_enter_brk(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
@@ -148,7 +148,7 @@ def syscalls__sys_exit_mremap(event_name, context, common_cpu,
 				print(f"ret={ret:x}".format())
 				print_callchain(common_callchain)
 		else:
-			print("Entered syscalls__sys_exit_mremap without syscalls__sys_enter_mremap first")
+			print(f"Entered syscalls__sys_exit_mremap without syscalls__sys_enter_mremap first, ret={ret:x}".format())
 
 def syscalls__sys_enter_mremap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
