@@ -15,7 +15,7 @@ from Core import *
 
 ## >>>>>>>>>>>>>>>>>>>>>>>>>>>> CHANGE ME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ### Add here the address of memory pages, that are you looking for ...
-memory_pages_to_consider = { 0x7a77be800000, 0x7a7ea7330000, 0x7a778a000000, 0x7a778cc00000, 0x7a77a5400000, 0x7a77a2c00000 }
+memory_pages_to_consider = {0x7f10b5400000} 
 ### or deactivate the filter by setting `memory_pages_to_consider` to **None**
 #memory_pages_to_consider = None
 ## <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -48,12 +48,19 @@ class MRemapParams:
 	flags: int
 	new_addr: int
 
+@dataclass
+class MProtectParams:
+    start: int
+    len: int
+    prot: int
+
 ## unsure if syscalls__sys_enter_ and syscalls__sys_exit_ are always in order, better use one stack
 ## per sys call
 mmap_stack = deque()
 munmap_stack = deque()
 mremap_stack = deque()
 brk_stack = deque()
+mprotect_stack = deque()
 
 ## syscalls callbacks
 def syscalls__sys_exit_mmap(event_name, context, common_cpu,
@@ -138,6 +145,32 @@ def syscalls__sys_enter_brk(event_name, context, common_cpu,
 		p = BrkParams(brk)
 		brk_stack.append(p)
 
+
+def syscalls__sys_exit_mprotect(event_name, context, common_cpu,
+	common_secs, common_nsecs, common_pid, common_comm,
+	common_callchain, __syscall_nr, ret, perf_sample_dict):
+
+		if len(mprotect_stack) > 0:
+			p = mprotect_stack.pop()
+
+			if (memory_pages_to_consider is not None \
+				and (p.start in memory_pages_to_consider)) \
+				or memory_pages_to_consider is None:
+
+				print_header(event_name, common_cpu, common_secs, common_nsecs, common_pid, common_comm)
+				print(f"Parameters: start={p.start:x}, len={p.len}, prot={readable_mem_page_protection(p.prot)}\n".format())
+				print(f"ret={ret:x}".format())
+				print_callchain(common_callchain)
+		else:
+			print(f"Entered syscalls__sys_exit_mprotect without syscalls__sys_enter_mprotect first, ret={ret:x}".format())
+
+def syscalls__sys_enter_mprotect(event_name, context, common_cpu,
+	common_secs, common_nsecs, common_pid, common_comm,
+	common_callchain, __syscall_nr, start, len, prot, perf_sample_dict):
+
+		p = MProtectParams(start, len, prot)
+		mprotect_stack.append(p)
+
 def syscalls__sys_exit_mremap(event_name, context, common_cpu,
 	common_secs, common_nsecs, common_pid, common_comm,
 	common_callchain, __syscall_nr, ret, perf_sample_dict):
@@ -216,7 +249,7 @@ def print_callchain(common_callchain):
 #echo '#include <sys/mman.h>' | gcc -E - -dM | grep MAP_
 def readable_mem_page_flags(flags):
 	msg = ""
-	if flags & 0x00 == 0x00:
+	if flags & 0xFF == 0x00:
 		msg += "MAP_FILE|"
 	if flags & 0x01 == 0x01:
 		msg += "MAP_SHARED|"
