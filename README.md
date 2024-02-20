@@ -8,7 +8,7 @@ This example shows how to collect perf syscall related trace events for a given 
 
 ```zsh
 TARGET_PID=12345
-perf trace record --call-graph fp -p $TARGET_PID -e 'syscalls:*_mmap,syscalls:*_munmap,syscalls:*_brk,syscalls:*_mremap' -o "~/traces/mytrace.data --sleep 60m
+perf trace record --call-graph fp -p $TARGET_PID -e 'syscalls:*_mmap,syscalls:*_munmap,syscalls:*_brk,syscalls:*_mremap,syscalls:*_mprotect' -o "~/traces/mytrace.data --sleep 60m
 ```
 
 ## 2. Configure the script `find-specific-memory-allocation.py`
